@@ -23,7 +23,7 @@ func main() {
 	archive := r.Group("/api/archive")
 	{
 		archive.POST("/information", fileHandler.GetArchiveInfo)
-		archive.POST("/files", handlers.ArchiveFiles)
+		archive.POST("/files", fileHandler.CreateArchive)
 	}
 
 	r.POST("api/mail/file", handlers.MailFile)

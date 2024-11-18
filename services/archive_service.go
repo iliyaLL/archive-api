@@ -80,28 +80,24 @@ func (s *archiveService) GetArchiveInfo(file *multipart.FileHeader) (*ArchiveInf
 }
 
 func (s *archiveService) CreateArchive(files []*multipart.FileHeader) ([]byte, error) {
-	// TODO defer
 	buf := bytes.NewBuffer(nil)
 	zipWriter := zip.NewWriter(buf)
+	defer zipWriter.Close()
 
 	for _, file := range files {
 		src, err := file.Open()
 		if err != nil {
-			src.Close()
-			zipWriter.Close()
 			return nil, err
 		}
 
 		dst, err := zipWriter.Create(file.Filename)
 		if err != nil {
 			src.Close()
-			zipWriter.Close()
 			return nil, err
 		}
 
 		if _, err := io.Copy(dst, src); err != nil {
 			src.Close()
-			zipWriter.Close()
 			return nil, err
 		}
 
