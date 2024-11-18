@@ -7,22 +7,30 @@ import (
 	"mime"
 	"net/http"
 	"path/filepath"
+	"strings"
 )
 
 var allowedArchiveTypes = map[string]bool{
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
-	"application/xml": true,
-	"image/jpeg":      true,
-	"image/png":       true,
+	"text/xml; charset=utf-8": true,
+	"image/jpeg":              true,
+	"image/png":               true,
+}
+
+var allowedEmailTypes = map[string]bool{
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+	"application/pdf": true,
 }
 
 type FileHandler struct {
 	archiveService services.ArchiveService
+	mailService    services.MailService
 }
 
-func NewFileHandler(as services.ArchiveService) *FileHandler {
+func NewFileHandler(as services.ArchiveService, ms services.MailService) *FileHandler {
 	return &FileHandler{
 		archiveService: as,
+		mailService:    ms,
 	}
 }
 
@@ -63,8 +71,8 @@ func (h *FileHandler) CreateArchive(c *gin.Context) {
 
 	for _, file := range files {
 		mimetype := mime.TypeByExtension(filepath.Ext(file.Filename))
-		print(mimetype)
-		if !allowedArchiveTypes[file.Header.Get("Content-Type")] {
+		print(mimetype + "\n")
+		if !allowedArchiveTypes[mimetype] {
 			c.JSON(http.StatusBadGateway, gin.H{"error": "invalid file mime type"})
 			return
 		}
@@ -79,6 +87,30 @@ func (h *FileHandler) CreateArchive(c *gin.Context) {
 	c.Data(http.StatusOK, "application/zip", archiveData)
 }
 
-func MailFile(c *gin.Context) {
+func (h *FileHandler) SendFileEmail(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no file provided"})
+		return
+	}
 
+	if !allowedEmailTypes[mime.TypeByExtension(filepath.Ext(file.Filename))] {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file mime type"})
+		return
+	}
+
+	emails := c.PostForm("emails")
+	if emails == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no email address provided"})
+		return
+	}
+
+	emailList := strings.Split(emails, ",")
+	err = h.mailService.SendFile(file, emailList)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

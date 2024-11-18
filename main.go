@@ -4,6 +4,7 @@ import (
 	"github.com/iliyaLL/archive-api/handlers"
 	"github.com/iliyaLL/archive-api/services"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,7 +16,15 @@ func main() {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
 
-	fileHandler := handlers.NewFileHandler(services.NewArchiveService())
+	fileHandler := handlers.NewFileHandler(
+		services.NewArchiveService(),
+		services.NewMailService(
+			os.Getenv("SMTP_HOST"),
+			os.Getenv("SMTP_PORT"),
+			os.Getenv("SMTP_USERNAME"),
+			os.Getenv("SMTP_PASSWORD"),
+		),
+	)
 
 	r := gin.Default()
 	r.HandleMethodNotAllowed = true
@@ -26,7 +35,7 @@ func main() {
 		archive.POST("/files", fileHandler.CreateArchive)
 	}
 
-	r.POST("api/mail/file", handlers.MailFile)
+	r.POST("api/mail/file", fileHandler.SendFileEmail)
 
 	r.Run()
 }
