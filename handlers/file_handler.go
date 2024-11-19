@@ -71,9 +71,8 @@ func (h *FileHandler) CreateArchive(c *gin.Context) {
 
 	for _, file := range files {
 		mimetype := mime.TypeByExtension(filepath.Ext(file.Filename))
-		print(mimetype + "\n")
 		if !allowedArchiveTypes[mimetype] {
-			c.JSON(http.StatusBadGateway, gin.H{"error": "invalid file mime type"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file mime type"})
 			return
 		}
 	}
