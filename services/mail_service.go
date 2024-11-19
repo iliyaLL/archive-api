@@ -2,10 +2,11 @@ package services
 
 import (
 	"bytes"
-	"gopkg.in/gomail.v2"
 	"io"
 	"mime/multipart"
 	"strconv"
+
+	"gopkg.in/gomail.v2"
 )
 
 type MailService interface {

@@ -2,9 +2,6 @@ package main
 
 import (
 	"bytes"
-	"github.com/iliyaLL/archive-api/handlers"
-	"github.com/iliyaLL/archive-api/services"
-	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"mime/multipart"
@@ -13,6 +10,10 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/iliyaLL/archive-api/handlers"
+	"github.com/iliyaLL/archive-api/services"
+	"github.com/joho/godotenv"
 
 	"github.com/gin-gonic/gin"
 )

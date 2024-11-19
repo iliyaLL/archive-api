@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/iliyaLL/archive-api/handlers"
-	"github.com/iliyaLL/archive-api/services"
 	"log"
 	"os"
+
+	"github.com/iliyaLL/archive-api/handlers"
+	"github.com/iliyaLL/archive-api/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

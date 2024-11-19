@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/iliyaLL/archive-api/services"
 	"mime"
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/iliyaLL/archive-api/services"
 )
 
 var allowedArchiveTypes = map[string]bool{
