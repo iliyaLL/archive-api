@@ -7,10 +7,12 @@ import (
 	"mime"
 	"mime/multipart"
 	"path/filepath"
+
+	"github.com/iliyaLL/archive-api/models"
 )
 
 type ArchiveService interface {
-	GetArchiveInfo(file *multipart.FileHeader) (*ArchiveInfo, error)
+	GetArchiveInfo(file *multipart.FileHeader) (*models.ArchiveInfo, error)
 	CreateArchive(files []*multipart.FileHeader) ([]byte, error)
 }
 
@@ -20,21 +22,7 @@ func NewArchiveService() ArchiveService {
 	return &archiveService{}
 }
 
-type ArchiveInfo struct {
-	Filename    string     `json:"filename"`
-	ArchiveSize float64    `json:"archive_size"`
-	TotalSize   float64    `json:"total_size"`
-	TotalFiles  float64    `json:"total_files"`
-	Files       []FileInfo `json:"files"`
-}
-
-type FileInfo struct {
-	FilePath string  `json:"file_path"`
-	Size     float64 `json:"size"`
-	Mimetype string  `json:"mimetype"`
-}
-
-func (s *archiveService) GetArchiveInfo(file *multipart.FileHeader) (*ArchiveInfo, error) {
+func (s *archiveService) GetArchiveInfo(file *multipart.FileHeader) (*models.ArchiveInfo, error) {
 	src, err := file.Open()
 	if err != nil {
 		return nil, err
@@ -51,12 +39,12 @@ func (s *archiveService) GetArchiveInfo(file *multipart.FileHeader) (*ArchiveInf
 		return nil, err
 	}
 
-	archiveInfo := &ArchiveInfo{
+	archiveInfo := &models.ArchiveInfo{
 		Filename:    file.Filename,
 		ArchiveSize: float64(file.Size),
 		TotalSize:   0,
 		TotalFiles:  0,
-		Files:       make([]FileInfo, 0),
+		Files:       make([]models.FileInfo, 0),
 	}
 
 	for _, f := range zipReader.File {
@@ -65,7 +53,7 @@ func (s *archiveService) GetArchiveInfo(file *multipart.FileHeader) (*ArchiveInf
 			mimeType = "application/octet-stream"
 		}
 
-		fileInfo := FileInfo{
+		fileInfo := models.FileInfo{
 			FilePath: f.Name,
 			Size:     float64(f.UncompressedSize64),
 			Mimetype: mimeType,
